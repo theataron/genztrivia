@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Splash Trivia 🌊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --water:#12B5C9;
+  --deepwater:#0787A0;
+  --cream:#FFF8EC;
+  --pink:#FF5C8A;
+  --lemon:#FFD23F;
+  --ink:#1E2447;
+  --shadow:#14243B;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  background:linear-gradient(160deg,var(--water) 0%,var(--deepwater) 100%);
+  background-attachment:fixed;
+  color:var(--ink);
+  min-height:100dvh;
+  display:flex;
+  justify-content:center;
+  overflow-x:hidden;
+}
+.app{
+  width:100%;
+  max-width:480px;
+  padding:24px 18px 48px;
+  position:relative;
+}
+/* floating bubbles background */
+.bubble{
+  position:fixed;border-radius:50%;
+  background:rgba(255,255,255,.12);
+  pointer-events:none;z-index:0;
+  animation:floatUp linear infinite;
+}
+@keyframes floatUp{
+  from{transform:translateY(110vh)}
+  to{transform:translateY(-20vh)}
+}
+@media (prefers-reduced-motion: reduce){
+  .bubble{animation:none;display:none}
+}
+.screen{display:none;position:relative;z-index:1;animation:pop .35s ease}
+.screen.active{display:block}
+@keyframes pop{
+  from{opacity:0;transform:translateY(14px) scale(.98)}
+  to{opacity:1;transform:none}
+}
+h1.logo{
+  font-family:'Shrikhand',cursive;
+  font-size:clamp(2.4rem,11vw,3.4rem);
+  color:var(--lemon);
+  text-shadow:3px 3px 0 var(--pink),6px 6px 0 var(--shadow);
+  transform:rotate(-3deg);
+  text-align:center;
+  line-height:1.05;
+  margin:8px 0 4px;
+}
+.tagline{
+  text-align:center;color:var(--cream);
+  font-weight:500;margin-bottom:26px;letter-spacing:.02em;
+}
+.card{
+  background:var(--cream);
+  border:3px solid var(--shadow);
+  border-radius:20px;
+  box-shadow:6px 6px 0 var(--shadow);
+  padding:22px 18px;
+  margin-bottom:18px;
+}
+.card.tilt-l{transform:rotate(-1.2deg)}
+.card.tilt-r{transform:rotate(1.2deg)}
+.label{
+  font-size:.78rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.12em;color:var(--pink);margin-bottom:10px;
+}
+button{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;font-size:1rem;
+  border:3px solid var(--shadow);
+  border-radius:16px;
+  padding:14px 18px;
+  cursor:pointer;
+  box-shadow:4px 4px 0 var(--shadow);
+  transition:transform .08s ease, box-shadow .08s ease;
+  color:var(--ink);
+}
+button:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--shadow)}
+button:focus-visible{outline:3px dashed var(--pink);outline-offset:3px}
+.btn-main{
+  display:block;width:100%;
+  background:var(--pink);color:var(--cream);
+  font-size:1.15rem;padding:16px;
+  text-transform:uppercase;letter-spacing:.05em;
+}
+.btn-ghost{background:var(--cream)}
+.btn-lemon{background:var(--lemon)}
+/* player count stepper */
+.stepper{display:flex;align-items:center;justify-content:center;gap:20px}
+.stepper button{width:58px;height:58px;font-size:1.6rem;background:var(--lemon);border-radius:50%;padding:0}
+.stepper .count{
+  font-family:'Shrikhand',cursive;font-size:2.6rem;min-width:60px;text-align:center;
+}
+/* name inputs */
+input[type=text]{
+  font-family:'Space Grotesk',sans-serif;
+  width:100%;font-size:1.05rem;font-weight:500;
+  border:3px solid var(--shadow);border-radius:14px;
+  padding:13px 14px;margin-bottom:10px;
+  background:#fff;color:var(--ink);
+}
+input[type=text]:focus{outline:none;border-color:var(--pink)}
+/* category chips */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cat-chip{
+  background:#fff;font-size:.92rem;padding:13px 8px;border-radius:14px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;line-height:1.2;
+  text-align:center;
+}
+.cat-chip .emoji{font-size:1.5rem}
+.cat-chip.on{background:var(--lemon)}
+.cat-chip.on::after{content:"✓ in";font-size:.7rem;color:var(--shadow);font-weight:700}
+.cat-chip::after{content:"tap to add";font-size:.7rem;color:#999;font-weight:500}
+/* turn screen */
+.round-pill{
+  display:inline-block;background:var(--shadow);color:var(--lemon);
+  font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;
+  padding:7px 16px;border-radius:99px;margin-bottom:14px;
+}
+.player-name{
+  font-family:'Shrikhand',cursive;
+  font-size:clamp(2rem,9vw,2.8rem);
+  color:var(--cream);
+  text-shadow:3px 3px 0 var(--pink);
+  transform:rotate(-2deg);
+  margin-bottom:6px;
+  word-break:break-word;
+}
+.turn-sub{color:var(--cream);font-weight:500;margin-bottom:20px}
+.cat-reveal{
+  font-family:'Shrikhand',cursive;font-size:1.5rem;text-align:center;
+  padding:6px 0 2px;
+}
+.cat-reveal .emoji{font-size:2.2rem;display:block;margin-bottom:2px}
+/* difficulty floats */
+.floats{display:flex;gap:12px;justify-content:center;margin-top:16px}
+.float-btn{
+  flex:1;aspect-ratio:1;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font-size:.85rem;padding:0;line-height:1.1;
+  border-width:5px;border-style:dashed;
+}
+.float-btn .pts{font-family:'Shrikhand',cursive;font-size:1.4rem}
+.float-easy{background:#9BE8C7;border-color:var(--shadow)}
+.float-med{background:var(--lemon);border-color:var(--shadow)}
+.float-hard{background:var(--pink);border-color:var(--shadow);color:var(--cream)}
+/* question screen */
+.q-text{font-size:1.3rem;font-weight:700;line-height:1.35;padding:6px 0 4px}
+.q-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.q-meta span{
+  font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  background:var(--shadow);color:var(--cream);padding:5px 12px;border-radius:99px;
+}
+.q-meta .pts-tag{background:var(--pink)}
+.answer-box{
+  background:#fff;border:3px dashed var(--pink);border-radius:14px;
+  padding:16px;margin-top:14px;font-weight:700;font-size:1.15rem;text-align:center;
+}
+.verdict-row{display:flex;gap:12px;margin-top:16px}
+.verdict-row button{flex:1;font-size:1.05rem}
+.btn-correct{background:#9BE8C7}
+.btn-wrong{background:#FFB3C7}
+/* scoreboard */
+.score-row{
+  display:flex;align-items:center;gap:12px;
+  background:#fff;border:3px solid var(--shadow);border-radius:14px;
+  padding:12px 14px;margin-bottom:10px;
+  box-shadow:4px 4px 0 var(--shadow);
+}
+.score-row .rank{
+  font-family:'Shrikhand',cursive;font-size:1.3rem;min-width:34px;text-align:center;
+}
+.score-row .nm{flex:1;font-weight:700;font-size:1.05rem;word-break:break-word}
+.score-row .pt{font-family:'Shrikhand',cursive;font-size:1.2rem;color:var(--pink)}
+.score-row.winner{background:var(--lemon);transform:rotate(-1.5deg) scale(1.03)}
+.crown{font-size:1.3rem}
+/* mini scoreboard during game */
+.mini-scores{
+  display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:18px;
+}
+.mini-scores span{
+  background:rgba(255,255,255,.9);border:2px solid var(--shadow);
+  border-radius:99px;padding:5px 12px;font-size:.8rem;font-weight:700;
+}
+/* confetti */
+.confetti{position:fixed;top:-20px;border-radius:2px;pointer-events:none;z-index:5;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+@media (prefers-reduced-motion: reduce){.confetti{display:none}}
+.wave{
+  position:fixed;bottom:0;left:0;width:100%;height:70px;z-index:0;pointer-events:none;opacity:.5;
+}
+.hidden{display:none!important}
+.hint{font-size:.85rem;color:#777;text-align:center;margin-top:8px}
+</style>
+</head>
+<body>
+<svg class="wave" viewBox="0 0 1440 100" preserveAspectRatio="none"><path fill="#0A6F84" d="M0,40 C240,90 480,-10 720,40 C960,90 1200,-10 1440,40 L1440,100 L0,100 Z"/></svg>
+<div class="app">
+
+  <!-- SETUP: PLAYER COUNT -->
+  <section class="screen active" id="s-count">
+    <h1 class="logo">Splash<br>Trivia</h1>
+    <p class="tagline">poolside brains, sunburnt egos 🌊</p>
+    <div class="card tilt-l">
+      <p class="label">How many players?</p>
+      <div class="stepper">
+        <button id="minus" aria-label="fewer players">−</button>
+        <div class="count" id="countDisplay">4</div>
+        <button id="plus" aria-label="more players">+</button>
+      </div>
+    </div>
+    <button class="btn-main" id="toNames">Next →</button>
+  </section>
+
+  <!-- SETUP: NAMES -->
+  <section class="screen" id="s-names">
+    <h1 class="logo">Who's<br>playing?</h1>
+    <p class="tagline">no fake names… ok fine, fake names allowed</p>
+    <div class="card tilt-r">
+      <p class="label">Player names</p>
+      <div id="nameInputs"></div>
+    </div>
+    <button class="btn-main" id="toCats">Next →</button>
+  </section>
+
+  <!-- SETUP: CATEGORIES -->
+  <section class="screen" id="s-cats">
+    <h1 class="logo">Pick your<br>poison</h1>
+    <p class="tagline">choose at least 2 — questions get shuffled from these</p>
+    <div class="card tilt-l">
+      <p class="label">Categories</p>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+    <button class="btn-main" id="startGame">Start the game 🏁</button>
+    <p class="hint" id="catHint"></p>
+  </section>
+
+  <!-- TURN: DIFFICULTY PICK -->
+  <section class="screen" id="s-turn">
+    <div style="text-align:center">
+      <span class="round-pill" id="roundPill"></span>
+      <div class="player-name" id="turnPlayer"></div>
+      <p class="turn-sub">it's your turn — hand them the phone? never. read it out loud 📣</p>
+    </div>
+    <div class="card tilt-r">
+      <p class="label">Your category is…</p>
+      <div class="cat-reveal" id="turnCat"></div>
+    </div>
+    <div class="card tilt-l">
+      <p class="label">Pick your risk level</p>
+      <div class="floats">
+        <button class="float-btn float-easy" data-diff="easy"><span class="pts">10</span>easy</button>
+        <button class="float-btn float-med" data-diff="medium"><span class="pts">15</span>medium</button>
+        <button class="float-btn float-hard" data-diff="hard"><span class="pts">20</span>hard</button>
+      </div>
+    </div>
+    <div class="mini-scores" id="miniScores"></div>
+  </section>
+
+  <!-- QUESTION -->
+  <section class="screen" id="s-question">
+    <div style="text-align:center">
+      <span class="round-pill" id="qPill"></span>
+    </div>
+    <div class="card tilt-l">
+      <div class="q-meta">
+        <span id="qCat"></span>
+        <span class="pts-tag" id="qPts"></span>
+      </div>
+      <p class="q-text" id="qText"></p>
+      <div class="answer-box hidden" id="answerBox"></div>
+    </div>
+    <button class="btn-main btn-lemon" id="revealBtn" style="color:var(--ink)">Reveal answer 👀</button>
+    <div class="verdict-row hidden" id="verdictRow">
+      <button class="btn-correct" id="btnCorrect">✅ Correct</button>
+      <button class="btn-wrong" id="btnWrong">❌ Nope</button>
+    </div>
+  </section>
+
+  <!-- FINAL SCOREBOARD -->
+  <section class="screen" id="s-final">
+    <h1 class="logo">Final<br>Splash 🏆</h1>
+    <p class="tagline">the pool has spoken</p>
+    <div id="finalBoard"></div>
+    <button class="btn-main" id="playAgain" style="margin-top:10px">Play again 🔁</button>
+  </section>
+
+</div>
+
+<script>
+/* ============ QUESTION BANK ============ */
+const BANK = {
+  geo: {name:"Geography", emoji:"🌍", easy:[
+    ["What is the capital of Spain?","Madrid"],
+    ["On which continent is Egypt?","Africa"],
+    ["What is the most commonly cited longest river in the world?","The Nile"],
+    ["Which country is shaped like a boot?","Italy"],
+    ["Which ocean lies between Europe and America?","The Atlantic"],
+    ["What is the capital of Portugal?","Lisbon"],
+    ["In which country is the Eiffel Tower?","France"],
+    ["Which country has a maple leaf on its flag?","Canada"]
+  ], medium:[
+    ["What is the capital of Australia?","Canberra"],
+    ["Which country has the most islands in the world?","Sweden"],
+    ["What is the smallest country in the world?","Vatican City"],
+    ["What is the largest hot desert on Earth?","The Sahara"],
+    ["Mount Everest sits on the border of Nepal and which other country?","China (Tibet)"],
+    ["What is the capital of Canada?","Ottawa"],
+    ["Which strait separates Spain from Morocco?","The Strait of Gibraltar"],
+    ["Which US state is the largest by area?","Alaska"]
+  ], hard:[
+    ["Which country has the longest coastline in the world?","Canada"],
+    ["What is the capital of New Zealand?","Wellington"],
+    ["Which two countries share the longest land border?","USA and Canada"],
+    ["Which is the only continent with no major desert?","Europe"],
+    ["Which African country was never colonized?","Ethiopia"],
+    ["Which river runs through Budapest?","The Danube"],
+    ["Which country officially has three capital cities?","South Africa"],
+    ["What is the deepest known point in the ocean called?","The Mariana Trench (Challenger Deep)"]
+  ]},
+  movies: {name:"Movies & TV", emoji:"🎬", easy:[
+    ["In which TV show does a chemistry teacher become a meth cook?","Breaking Bad"],
+    ["Which movie features the line “I'll be back”?","The Terminator"],
+    ["What kind of animal is Nemo?","A clownfish"],
+    ["Which wizard school does Harry Potter attend?","Hogwarts"],
+    ["Which Netflix show is set in Hawkins and features the Upside Down?","Stranger Things"],
+    ["Who plays Iron Man in the Marvel movies?","Robert Downey Jr."],
+    ["In Frozen, who is Elsa's sister?","Anna"],
+    ["In which movie does a theme park bring dinosaurs back to life?","Jurassic Park"]
+  ], medium:[
+    ["Which film was the first non-English movie to win the Best Picture Oscar?","Parasite"],
+    ["Squid Game comes from which country?","South Korea"],
+    ["Who directed Oppenheimer?","Christopher Nolan"],
+    ["In Friends, what is the name of the coffee shop?","Central Perk"],
+    ["Which actress plays Barbie in the 2023 movie?","Margot Robbie"],
+    ["What is the highest-grossing film of all time?","Avatar"],
+    ["In The Office (US), what is the company called?","Dunder Mifflin"],
+    ["Zendaya plays Rue in which HBO series?","Euphoria"]
+  ], hard:[
+    ["Which director made both Mulholland Drive and Blue Velvet?","David Lynch"],
+    ["Who directed Pulp Fiction?","Quentin Tarantino"],
+    ["In Succession, what is the family's media company called?","Waystar Royco"],
+    ["Which actor has won the most acting Oscars ever?","Katharine Hepburn (4)"],
+    ["What is the name of the AI in 2001: A Space Odyssey?","HAL 9000"],
+    ["Which Spanish director made Volver and Pain and Glory?","Pedro Almodóvar"],
+    ["What was the first ever feature-length animated film?","Snow White and the Seven Dwarfs"],
+    ["What is the fictional African country in Black Panther?","Wakanda"]
+  ]},
+  celeb: {name:"Celeb & Pop Culture", emoji:"⭐", easy:[
+    ["Which artist sings “Shake It Off”?","Taylor Swift"],
+    ["Who is Beyoncé married to?","Jay-Z"],
+    ["Rosalía is a pop star from which country?","Spain"],
+    ["Which artist released the album “Renaissance” in 2022?","Beyoncé"],
+    ["Bad Bunny sings mostly in which language?","Spanish"],
+    ["Which footballer is known simply as “Leo”?","Lionel Messi"],
+    ["Harry Styles was in which boy band?","One Direction"],
+    ["Kim Kardashian is part of which famous family?","The Kardashian-Jenners"]
+  ], medium:[
+    ["Which two celebrities were involved in the 2022 Oscars slap?","Will Smith and Chris Rock"],
+    ["What is Lady Gaga's real first name?","Stefani"],
+    ["Which rapper's real name is Aubrey Graham?","Drake"],
+    ["Dua Lipa's parents come from which region?","Kosovo (Albanian family)"],
+    ["Taylor Swift got engaged to which NFL player?","Travis Kelce"],
+    ["“Little Monsters” are the fans of which singer?","Lady Gaga"],
+    ["Rihanna's beauty brand is called what?","Fenty Beauty"],
+    ["Billie Eilish's brother and producer is called what?","Finneas"]
+  ], hard:[
+    ["What did Dua Lipa work as before becoming a pop star?","A model"],
+    ["What is Zendaya's last name?","Coleman"],
+    ["Which artist holds the record for the most Grammy wins?","Beyoncé"],
+    ["What is Bad Bunny's real first name?","Benito"],
+    ["In which city was Shakira born?","Barranquilla, Colombia"],
+    ["What was the name of Rihanna's last studio album (2016)?","Anti"],
+    ["What is the real name of the Madrid artist C. Tangana?","Antón Álvarez"],
+    ["Kim Kardashian passed the “baby bar” exam on her path to becoming what?","A lawyer"]
+  ]},
+  science: {name:"Science & Tech", emoji:"🔬", easy:[
+    ["What does GPS stand for?","Global Positioning System"],
+    ["Which planet is known as the Red Planet?","Mars"],
+    ["H2O is the chemical formula for what?","Water"],
+    ["Which company makes the iPhone?","Apple"],
+    ["Which gas do humans need to breathe to survive?","Oxygen"],
+    ["How many legs does a spider have?","Eight"],
+    ["What does “AI” stand for?","Artificial Intelligence"],
+    ["What force pulls objects toward the Earth?","Gravity"]
+  ], medium:[
+    ["What is the most abundant element in the human body by mass?","Oxygen"],
+    ["What is the hardest natural substance on Earth?","Diamond"],
+    ["How many bones are in the adult human body?","206"],
+    ["Which planet has the most moons?","Saturn"],
+    ["Which vitamin does your body make from sunlight?","Vitamin D"],
+    ["Roughly what is the speed of light in km per second?","About 300,000 km/s"],
+    ["Who founded SpaceX?","Elon Musk"],
+    ["What organ pumps blood around your body?","The heart"]
+  ], hard:[
+    ["What is the phenomenon where light bends when passing between materials?","Refraction"],
+    ["Which particle is nicknamed the “God particle”?","The Higgs boson"],
+    ["Which blood type is the universal donor?","O negative"],
+    ["In what year did the first iPhone launch?","2007"],
+    ["What is known as the powerhouse of the cell?","The mitochondria"],
+    ["Which element has the chemical symbol Au?","Gold"],
+    ["Roughly how long does sunlight take to reach Earth?","About 8 minutes"],
+    ["What is a CAPTCHA designed to test?","That you're a human, not a robot"]
+  ]},
+  food: {name:"Food & Drinks", emoji:"🍹", easy:[
+    ["What is the main spirit in a Mojito?","Rum"],
+    ["Which country is sushi from?","Japan"],
+    ["What is the main ingredient of guacamole?","Avocado"],
+    ["What are the two main ingredients of a Spanish tortilla?","Potato and egg"],
+    ["The toppings of a Margherita pizza represent the flag of which country?","Italy"],
+    ["What fruit is wine usually made from?","Grapes"],
+    ["Tequila comes from which country?","Mexico"],
+    ["Besides Aperol, what sparkling wine goes into an Aperol Spritz?","Prosecco"]
+  ], medium:[
+    ["Pad Thai comes from which country?","Thailand"],
+    ["What is the main spirit in a Margarita?","Tequila"],
+    ["Hummus is mainly made from which legume?","Chickpeas"],
+    ["Which cheese is traditionally used in tiramisu?","Mascarpone"],
+    ["Which country drinks the most coffee per person?","Finland"],
+    ["What is “umami”?","The fifth basic taste (savory)"],
+    ["Paella originates from which Spanish region?","Valencia"],
+    ["Kimchi is a staple of which country's cuisine?","Korea"]
+  ], hard:[
+    ["What is the Maillard reaction?","The browning reaction that creates flavor when food cooks at high heat"],
+    ["What is the world's most expensive spice by weight?","Saffron"],
+    ["Champagne can only be called champagne if it comes from where?","The Champagne region of France"],
+    ["What does “al dente” literally mean?","“To the tooth”"],
+    ["Which nut is used to make marzipan?","Almond"],
+    ["What is actually the hottest part of a chili pepper?","The white pith/membrane, not the seeds"],
+    ["At what temperature is gazpacho traditionally served?","Cold"],
+    ["Which grain is Scotch whisky traditionally made from?","Barley"]
+  ]},
+  internet: {name:"Internet & Memes", emoji:"📱", easy:[
+    ["What does FOMO stand for?","Fear Of Missing Out"],
+    ["Which app became famous for short dance videos?","TikTok"],
+    ["What does “LOL” stand for?","Laugh Out Loud"],
+    ["Which app has a ghost as its logo?","Snapchat"],
+    ["Which platform is organized into “subreddits”?","Reddit"],
+    ["What was Twitter renamed to?","X"],
+    ["What does “DM” stand for?","Direct Message"],
+    ["Which emoji is officially called “Face with Tears of Joy”?","The crying-laughing emoji 😂"]
+  ], medium:[
+    ["In what year did Instagram launch?","2010"],
+    ["What does “GOAT” stand for?","Greatest Of All Time"],
+    ["What breed of dog is the “doge” meme?","Shiba Inu"],
+    ["What does “NPC” mean in internet slang?","Non-Playable Character"],
+    ["Who founded Facebook?","Mark Zuckerberg"],
+    ["“Rickrolling” tricks you into which song?","Never Gonna Give You Up by Rick Astley"],
+    ["Who is the most-subscribed individual YouTuber?","MrBeast"],
+    ["TikTok is owned by which Chinese company?","ByteDance"]
+  ], hard:[
+    ["What was the title of the first YouTube video ever?","“Me at the zoo”"],
+    ["In what year was YouTube founded?","2005"],
+    ["What does “SEO” stand for?","Search Engine Optimization"],
+    ["What was Instagram briefly called before its launch?","Burbn"],
+    ["What is it called when someone buys a web domain hoping to resell it?","Cybersquatting (domain squatting)"],
+    ["What does “OG” originally stand for?","Original Gangster"],
+    ["How many people appear in the “distracted boyfriend” meme photo?","Three"],
+    ["What does it mean to get “ratioed” on X/Twitter?","Your post gets fewer likes than the replies criticizing it"]
+  ]},
+  sports: {name:"Sports & Games", emoji:"⚽", easy:[
+    ["How many players per basketball team are on the court at once?","Five"],
+    ["Which country won the 2022 FIFA World Cup?","Argentina"],
+    ["In which sport do you hit a shuttlecock?","Badminton"],
+    ["How many rings are on the Olympic flag?","Five"],
+    ["Real Madrid plays “El Clásico” against which club?","FC Barcelona"],
+    ["Which sport did Rafael Nadal play professionally?","Tennis"],
+    ["How often are the Summer Olympics held?","Every four years"],
+    ["In football, what color card sends a player off?","Red"]
+  ], medium:[
+    ["In which city were the 2020 Summer Olympics actually held?","Tokyo (in 2021)"],
+    ["How many players per team are on a football pitch?","Eleven"],
+    ["In tennis, what is a score of zero called?","Love"],
+    ["Which country invented table tennis?","England"],
+    ["What is Usain Bolt's 100m world record time?","9.58 seconds"],
+    ["How many squares are on a chessboard?","64"],
+    ["The Ryder Cup is contested in which sport?","Golf"],
+    ["What does “pole position” mean in Formula 1?","Starting first on the grid"]
+  ], hard:[
+    ["In chess, what is an opening called where you sacrifice a pawn for early control?","A gambit"],
+    ["Exactly how long is a marathon?","42.195 km (26.2 miles)"],
+    ["Which nation has won the most FIFA World Cups?","Brazil (five)"],
+    ["What is the best possible hand in poker?","A royal flush"],
+    ["How many points is the bullseye worth in darts?","50"],
+    ["Which club has won the most Champions League titles?","Real Madrid"],
+    ["How long is the shot clock in the NBA?","24 seconds"],
+    ["What is the maximum break in snooker?","147"]
+  ]},
+  adulting: {name:"Everyday Adulting", emoji:"🎭", easy:[
+    ["What does ATM stand for?","Automated Teller Machine"],
+    ["What do you call money that you owe?","Debt"],
+    ["Which document do you need to travel between most countries?","A passport"],
+    ["At what temperature does water boil at sea level (in °C)?","100°C"],
+    ["What is the general emergency number in the EU?","112"],
+    ["Which appliance keeps food frozen?","A freezer"],
+    ["What does CV stand for?","Curriculum Vitae"],
+    ["What do you call the money you pay monthly to live in someone else's flat?","Rent"]
+  ], medium:[
+    ["What is the tax on profits from selling stocks or property called?","Capital gains tax"],
+    ["What is the difference between gross and net salary?","Gross is before taxes; net is what you take home"],
+    ["What is a credit score used for?","To judge how reliably you repay borrowed money"],
+    ["What does “inflation” mean?","Prices rising over time / money losing value"],
+    ["What is a “deductible” in insurance?","The amount you pay before insurance covers the rest"],
+    ["What does “APR” stand for?","Annual Percentage Rate"],
+    ["What is it called when a company sells shares to the public for the first time?","An IPO (Initial Public Offering)"],
+    ["On which side of the road do they drive in the UK?","The left"]
+  ], hard:[
+    ["What is the “rule of 72” in personal finance?","Divide 72 by the interest rate to estimate the years needed to double your money"],
+    ["What is the key difference between a debit and a credit card?","Debit spends your own money; credit borrows the bank's"],
+    ["What does “compound interest” mean?","Earning interest on your interest"],
+    ["What does “ETF” stand for?","Exchange-Traded Fund"],
+    ["In Spain, what is an “NIE”?","The foreigner identification number (Número de Identidad de Extranjero)"],
+    ["What is it called when you spread your investments to reduce risk?","Diversification"],
+    ["What does a “notice period” mean at a job?","The time you must keep working after resigning"],
+    ["What is a landlord's deposit meant to cover?","Damages or unpaid rent"]
+  ]}
+};
+
+/* ============ STATE ============ */
+const TOTAL_ROUNDS = 5;
+let state = {
+  playerCount: 4,
+  players: [],       // {name, score}
+  categories: [],    // keys
+  round: 1,
+  turnIdx: 0,
+  current: null,     // {catKey, diff, q, a, pts}
+  used: {}           // catKey -> {easy:Set, medium:Set, hard:Set}
+};
+
+/* ============ HELPERS ============ */
+const $ = id => document.getElementById(id);
+const show = id => {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo(0,0);
+};
+const rand = arr => arr[Math.floor(Math.random()*arr.length)];
+
+/* bubbles */
+for(let i=0;i<10;i++){
+  const b=document.createElement('div');
+  b.className='bubble';
+  const s=10+Math.random()*30;
+  b.style.width=b.style.height=s+'px';
+  b.style.left=Math.random()*100+'vw';
+  b.style.animationDuration=(9+Math.random()*14)+'s';
+  b.style.animationDelay=(-Math.random()*15)+'s';
+  document.body.appendChild(b);
+}
+
+/* ============ SETUP: COUNT ============ */
+$('minus').onclick = ()=>{ if(state.playerCount>2) $('countDisplay').textContent = --state.playerCount; };
+$('plus').onclick  = ()=>{ if(state.playerCount<8) $('countDisplay').textContent = ++state.playerCount; };
+$('toNames').onclick = ()=>{
+  const wrap=$('nameInputs'); wrap.innerHTML='';
+  for(let i=0;i<state.playerCount;i++){
+    const inp=document.createElement('input');
+    inp.type='text'; inp.maxLength=16;
+    inp.placeholder='Player '+(i+1);
+    inp.autocomplete='off';
+    wrap.appendChild(inp);
+  }
+  show('s-names');
+};
+
+/* ============ SETUP: NAMES ============ */
+$('toCats').onclick = ()=>{
+  const inputs=[...$('nameInputs').querySelectorAll('input')];
+  state.players = inputs.map((inp,i)=>({
+    name: inp.value.trim() || ('Player '+(i+1)),
+    score: 0
+  }));
+  buildCatGrid();
+  show('s-cats');
+};
+
+/* ============ SETUP: CATEGORIES ============ */
+function buildCatGrid(){
+  const grid=$('catGrid'); grid.innerHTML='';
+  Object.entries(BANK).forEach(([key,cat])=>{
+    const b=document.createElement('button');
+    b.className='cat-chip';
+    b.innerHTML='<span class="emoji">'+cat.emoji+'</span>'+cat.name;
+    b.onclick=()=>{
+      b.classList.toggle('on');
+      const on=b.classList.contains('on');
+      if(on) state.categories.push(key);
+      else state.categories = state.categories.filter(k=>k!==key);
+      $('catHint').textContent = state.categories.length<2 ? 'pick at least 2 to start' : state.categories.length+' categories in the mix ✨';
+    };
+    grid.appendChild(b);
+  });
+  state.categories=[];
+  $('catHint').textContent='pick at least 2 to start';
+}
+$('startGame').onclick = ()=>{
+  if(state.categories.length<2){
+    $('catHint').textContent='☝️ you need at least 2 categories!';
+    return;
+  }
+  state.round=1; state.turnIdx=0; state.used={};
+  state.players.forEach(p=>p.score=0);
+  startTurn();
+};
+
+/* ============ GAME FLOW ============ */
+function startTurn(){
+  const p = state.players[state.turnIdx];
+  const catKey = rand(state.categories);
+  state.current = { catKey };
+  $('roundPill').textContent = 'Round '+state.round+' of '+TOTAL_ROUNDS;
+  $('turnPlayer').textContent = p.name;
+  const cat = BANK[catKey];
+  $('turnCat').innerHTML = '<span class="emoji">'+cat.emoji+'</span>'+cat.name;
+  renderMiniScores();
+  show('s-turn');
+}
+
+function renderMiniScores(){
+  $('miniScores').innerHTML = state.players
+    .map(p=>'<span>'+esc(p.name)+' · '+p.score+'</span>').join('');
+}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+document.querySelectorAll('.float-btn').forEach(btn=>{
+  btn.onclick = ()=>{
+    const diff = btn.dataset.diff;
+    const catKey = state.current.catKey;
+    const pts = diff==='easy'?10:diff==='medium'?15:20;
+    // track used questions, reset pool if exhausted
+    state.used[catKey] = state.used[catKey] || {easy:new Set(),medium:new Set(),hard:new Set()};
+    const usedSet = state.used[catKey][diff];
+    const pool = BANK[catKey][diff];
+    let available = pool.map((_,i)=>i).filter(i=>!usedSet.has(i));
+    if(available.length===0){ usedSet.clear(); available = pool.map((_,i)=>i); }
+    const qi = rand(available);
+    usedSet.add(qi);
+    const [q,a] = pool[qi];
+    state.current = {...state.current, diff, pts, q, a};
+    // render question screen
+    const p = state.players[state.turnIdx];
+    $('qPill').textContent = p.name + ' · Round ' + state.round;
+    $('qCat').textContent = BANK[catKey].emoji+' '+BANK[catKey].name;
+    $('qPts').textContent = pts+' pts · '+diff;
+    $('qText').textContent = q;
+    $('answerBox').classList.add('hidden');
+    $('answerBox').textContent = '';
+    $('verdictRow').classList.add('hidden');
+    $('revealBtn').classList.remove('hidden');
+    show('s-question');
+  };
+});
+
+$('revealBtn').onclick = ()=>{
+  $('answerBox').textContent = state.current.a;
+  $('answerBox').classList.remove('hidden');
+  $('revealBtn').classList.add('hidden');
+  $('verdictRow').classList.remove('hidden');
+};
+
+$('btnCorrect').onclick = ()=>{ state.players[state.turnIdx].score += state.current.pts; nextTurn(); };
+$('btnWrong').onclick = nextTurn;
+
+function nextTurn(){
+  state.turnIdx++;
+  if(state.turnIdx >= state.players.length){
+    state.turnIdx = 0;
+    state.round++;
+  }
+  if(state.round > TOTAL_ROUNDS){ showFinal(); }
+  else { startTurn(); }
+}
+
+/* ============ FINAL ============ */
+function showFinal(){
+  const sorted = [...state.players].sort((a,b)=>b.score-a.score);
+  const medals = ['🥇','🥈','🥉'];
+  $('finalBoard').innerHTML = sorted.map((p,i)=>{
+    const isWin = p.score===sorted[0].score;
+    return '<div class="score-row'+(isWin?' winner':'')+'">'
+      +'<div class="rank">'+(medals[i]||(i+1))+'</div>'
+      +'<div class="nm">'+esc(p.name)+(isWin?' <span class="crown">👑</span>':'')+'</div>'
+      +'<div class="pt">'+p.score+' pts</div></div>';
+  }).join('');
+  show('s-final');
+  confetti();
+}
+function confetti(){
+  const colors=['#FF5C8A','#FFD23F','#12B5C9','#FFF8EC','#9BE8C7'];
+  for(let i=0;i<60;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.width=(6+Math.random()*8)+'px';
+    c.style.height=(8+Math.random()*10)+'px';
+    c.style.background=rand(colors);
+    c.style.animationDuration=(2.2+Math.random()*2.5)+'s';
+    c.style.animationDelay=(Math.random()*1.5)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),6000);
+  }
+}
+$('playAgain').onclick = ()=>{
+  state.playerCount=4; $('countDisplay').textContent=4;
+  show('s-count');
+};
+</script>
+</body>
+</html>
